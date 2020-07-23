@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# EXCEL SHEETS
+*.xlsx
+
 # C extensions
 *.so
 
