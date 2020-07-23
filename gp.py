@@ -7,22 +7,26 @@ hoja = "Hoja1"
 df = pd.read_excel(path_file, sheet_name=hoja)
 pd.options.mode.chained_assignment = None  # default='warn'
 
+
 # PARAMETROS GAVETAS
-alto = 220
-ancho = 400
-largo = 600
+alto = 201
+ancho = 356
+largo = 556
+largo_ext = 600
+ancho_ext = 400
+alto_ext = 220
 peso = 30
 a1 = largo * ancho * alto
 a1_capacidad = 1
-a2_ancho_gav = 390
-a2_largo_gav = 293
+a2_ancho_gav = 356
+a2_largo_gav = (556 / 2) - 10
 a2_vol_gav = a2_ancho_gav * a2_largo_gav * alto
 a2_peso_gav = peso / 2
 a2_capacidad = 5
-a3_ancho_gav = 390
-a3_largo_gav = 145
+a3_ancho_gav = 356
+a3_largo_gav = (556 / 4) -20
 a3_vol_gav = a3_ancho_gav * a3_largo_gav * alto
-a3_peso_gav = peso / 3
+a3_peso_gav = peso / 4
 a3_capacidad = 30
 
 # TRATA COLUMNAS
@@ -35,6 +39,7 @@ df['LIMITANTE'] = np.where(df['CANTxPESO'] > df['CANTxVOL'], 'VOLUMEN', 'PESO')
 df['CONTxMES'] = np.where(df['LIMITANTE'] == 'VOLUMEN', (df['QTY'] /
                                                          df['CANTxVOL']) / df['MES'], (df['QTY'] / df['CANTxPESO']) / df['MES'])
 skus_in = len(df)
+qty_in = df['QTY'].sum()
 
 
 # FILTROS
@@ -118,11 +123,9 @@ df_a1["CONTxMES"] = np.where(df_a1["LIMITANTE"] == "VOLUMEN", (df_a1["QTY"] /
                                                                df_a1["CANTxVOL"]) / df_a1["MES"], (df_a1["QTY"] / df_a1["CANTxPESO"]) / df_a1["MES"])
 
 
-
-
 # VARIABLES SUMA UNIDADES Y SKUS
 mes_SKU = len(df_desc_meses)
-mes_QTY = df_desc_meses['QTY'].sum()  # 6532
+mes_QTY = df_desc_meses['QTY'].sum()
 qty_SKU = len(df_desc_QTY)
 qty_QTY = df_desc_QTY['QTY'].sum()
 sd_SKU = len(df_desc_sindatos)
@@ -137,11 +140,15 @@ a3_SKU = len(df_a3)
 a3_QTY = df_a3['QTY'].sum()
 df_SKU = len(df)
 df_QTY = df['QTY'].sum()
+a1_CONT = df_a1['CONTxMES'].sum()
+a2_CONT = df_a2['CONTxMES'].sum()
+a3_CONT = df_a3['CONTxMES'].sum()
 
-data = [['descarte-mes', mes_SKU, mes_QTY], ['descarte-cantidad', qty_SKU, qty_QTY], ['descarte-sindatos', sd_SKU, sd_QTY],
-        ['descarte-limitefisico', limit_SKU, limit_QTY], ['Sobra', df_SKU, df_QTY], ['A1', a1_SKU, a1_QTY], ['A2', a2_SKU, a2_QTY], ['A3', a3_SKU, a3_QTY]]
+data = [['in',skus_in,qty_in],['descarte-mes', mes_SKU, mes_QTY], ['descarte-cantidad', qty_SKU, qty_QTY], ['descarte-sindatos', sd_SKU, sd_QTY],
+        ['descarte-limitefisico', limit_SKU, limit_QTY], ['Sobra', df_SKU, df_QTY], ['A1', a1_SKU, a1_QTY], ['A2', a2_SKU, a2_QTY], ['A3', a3_SKU, a3_QTY],
+        ['ocupacion','A1',a1_CONT], ['ocupacion','A1',a2_CONT], ['ocupacion','A3',a3_CONT]]
 
-df_var = pd.DataFrame(data, columns = ['Name', 'SKU', 'QTY']) 
+df_var = pd.DataFrame(data, columns=['Name', 'SKU', 'QTY'])
 
 df.to_excel("df.xlsx", sheet_name="Sobra")
 with pd.ExcelWriter('df.xlsx', mode='a') as writer:
@@ -153,7 +160,3 @@ with pd.ExcelWriter('df.xlsx', mode='a') as writer:
     df_desc_QTY.to_excel(writer, sheet_name="out-cantidad")
     df_desc_sindatos.to_excel(writer, sheet_name="out-sindatos")
     df_desc_limitante.to_excel(writer, sheet_name="out-limitante")
-
-
-
-print(a1_SKU, a2_SKU, a3_SKU, mes_SKU, qty_SKU, sd_SKU, limit_SKU, df_SKU)
